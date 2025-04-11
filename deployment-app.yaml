@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infnet-guia-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: infnet-guia
+  template:
+    metadata:
+      labels:
+        app: infnet-guia
+    spec:
+      containers:
+      - name: infnet-guia
+        image: mariopagnozzi/infnet-guia:v1
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
