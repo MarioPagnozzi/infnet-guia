@@ -13,13 +13,19 @@ spec:
         app: infnet-guia
     spec:
       containers:
-      - name: infnet-guia
-        image: mariopagnozzi/infnet-guia:v1
-        ports:
-        - containerPort: 5000
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 5000
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: infnet-guia
+          image: mariopagnozzi/infnet-guia:v1
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10

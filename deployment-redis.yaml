@@ -13,7 +13,17 @@ spec:
         app: redis
     spec:
       containers:
-      - name: redis
-        image: redis:7
-        ports:
-        - containerPort: 6379
+        - name: redis
+          image: redis:7.2.4-alpine
+          ports:
+            - containerPort: 6379
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 10

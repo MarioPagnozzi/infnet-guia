@@ -1,23 +1,44 @@
-# Use uma imagem base oficial do Node.js (versão 18 ou superior)
-FROM node:22
+# Etapa 1 - Build da aplicação
+FROM node:22 AS builder
 
-# Defina o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# Copie os arquivos de dependências (package.json, pnpm-lock.yaml)
+# Copia os arquivos de dependência
 COPY package.json pnpm-lock.yaml ./
 
-# Instale o pnpm globalmente
+# Instala o gerenciador pnpm
 RUN npm install -g pnpm
 
-# Instale as dependências usando o pnpm
+# Instala as dependências
 RUN pnpm install
 
-# Copie o restante do código para dentro do contêiner
+# Copia todo o projeto
 COPY . .
 
-# Exponha a porta que a aplicação vai usar
-EXPOSE 5000
+# Faz o build de produção do Next.js
+RUN pnpm build
 
-# Comando para rodar a aplicação (ajuste conforme necessário)
+
+# Etapa 2 - Imagem de execução (runtime)
+FROM node:22 AS runner
+
+WORKDIR /app
+
+# Instala o pnpm novamente
+RUN npm install -g pnpm
+
+# Copia os arquivos necessários da etapa de build
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
+
+# Expõe a porta usada pela aplicação
+EXPOSE 3000
+ENV PORT=5000
+
+# Comando para iniciar a aplicação em produção
 CMD ["pnpm", "start"]
